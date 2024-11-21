@@ -1,23 +1,25 @@
 import sympy as sp
 
-def biseccion(f_evaluar, var, a, b, tol=1e-6, i=100): # a,b son los extremos del intervalo
 
-    f = sp.lambdify(var, f_evaluar)  
+def biseccion(funcion, x, a, b, tol=1e-6, max_iter=100):
+    fa = funcion.subs(x, a)
+    fb = funcion.subs(x, b)
 
-    if f(a) * f(b) >= 0:
-        raise ValueError("No se puede encontrar una raíz en el intervalo [a, b].")
+    if fa * fb > 0:
+        raise ValueError("La función no cambia de signo en el intervalo dado.")
 
-    for i in range(i):
-        c = (a + b) / 2  # Calcular el punto medio
-        fc = f(c)
+    for i in range(max_iter):
+        c = (a + b) / 2
+        fc = funcion.subs(x, c)
 
-        if abs(fc) < tol or abs(b - a) < tol: # Criterio de convergencia
+        if abs(fc) < tol or (b - a) / 2 < tol:
             return c
 
-        # Decidir el nuevo intervalo
-        if f(a) * fc < 0:
-            b = c  # La raíz está entre a y c
+        if fa * fc < 0:
+            b = c
+            fb = fc
         else:
-            a = c  # La raíz está entre c y b
+            a = c
+            fa = fc
 
-    raise ValueError("El método no convergió después de {} iteraciones.".format(i))
+    raise ValueError("El método no converge.")
