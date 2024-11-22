@@ -1,14 +1,14 @@
 import sympy as sp
 
 
-def biseccion(funcion, x, a, b, tol=1e-6, max_iter=100):
+def biseccion(funcion, x, a, b, tol=1e-6, i=100):
     fa = funcion.subs(x, a)
     fb = funcion.subs(x, b)
 
     if fa * fb > 0:
         raise ValueError("La función no cambia de signo en el intervalo dado.")
 
-    for i in range(max_iter):
+    for i in range(i):
         c = (a + b) / 2
         fc = funcion.subs(x, c)
 

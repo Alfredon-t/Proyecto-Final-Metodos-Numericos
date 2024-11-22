@@ -132,62 +132,92 @@ def pantalla_bs():
     tk.Button(ventana, text="Regresar al menú principal",
               command=lambda: regresar_al_menu(ventana)).pack(pady=10)
 
+# Ventana para punto fijo
+
 
 def pantalla_pf():
     ventana = tk.Toplevel()
     ventana.title("Método de Punto Fijo")
-    centrar(ventana, 450, 500)
+    centrar(ventana, 500, 600)
 
     tk.Label(ventana, text="Método de Punto Fijo",
              font=("Arial", 16)).pack(pady=10)
 
+    # Campo para f(x)
     tk.Label(ventana, text="Función f(x):").pack(pady=5)
-    funcion_g_entry = tk.Entry(ventana, width=40)
-    funcion_g_entry.pack(pady=5)
-
-    tk.Label(ventana, text="Función g(x) (opcional):").pack(pady=5)
     funcion_f_entry = tk.Entry(ventana, width=40)
     funcion_f_entry.pack(pady=5)
 
+    # Campo para g(x)
+    tk.Label(ventana, text="Función g(x):").pack(pady=5)
+    funcion_g_entry = tk.Entry(ventana, width=40)
+    funcion_g_entry.pack(pady=5)
+
+    # Campo para x0
     tk.Label(ventana, text="Valor inicial (x0):").pack(pady=5)
     x0_entry = tk.Entry(ventana, width=20)
-    x0_entry.insert(0, "0.5")
+    x0_entry.insert(0, "0.5")  # Valor inicial por defecto
     x0_entry.pack(pady=5)
 
-    tk.Label(ventana, text="Error:").pack(pady=5)
+    # Campo para tolerancia
+    tk.Label(ventana, text="Error (tolerancia):").pack(pady=5)
     tolerancia_entry = tk.Entry(ventana, width=20)
-    tolerancia_entry.insert(0, "1e-6")
+    tolerancia_entry.insert(0, "1e-6")  # Tolerancia por defecto
     tolerancia_entry.pack(pady=5)
 
+    # Campo para número máximo de iteraciones
     tk.Label(ventana, text="Número máximo de iteraciones:").pack(pady=5)
     iteraciones_entry = tk.Entry(ventana, width=20)
-    iteraciones_entry.insert(0, "50")
+    iteraciones_entry.insert(0, "50")  # Iteraciones por defecto
     iteraciones_entry.pack(pady=5)
 
     def calcular():
         try:
-            funcion_g_str = funcion_g_entry.get()
-            funcion_f_str = funcion_f_entry.get()
+            # Obtener entradas del usuario
+            funcion_f_str = funcion_f_entry.get()  # f(x) ingresado por el usuario
+            funcion_g_str = funcion_g_entry.get()  # g(x) ingresado por el usuario
+
+            if not funcion_f_str or not funcion_g_str:
+                raise ValueError("Debe ingresar ambas funciones f(x) y g(x).")
+
+            # Convertir entradas a expresiones de Sympy
+            x = sp.Symbol('x')
+            funcion_f = sp.sympify(funcion_f_str)
+            funcion_g = sp.sympify(funcion_g_str)
+
+            # Leer el resto de los parámetros
             x0 = float(x0_entry.get())
             tol = float(tolerancia_entry.get())
             max_iter = int(iteraciones_entry.get())
 
-            raiz, iteraciones, resultados = punto_fijo(
-                funcion_g_str, funcion_f_str, x0, tol, max_iter)
+            # Llamar al método de punto fijo
+            raiz, resultados = punto_fijo(
+                funcion_f, funcion_g, x0, tol, max_iter)
 
+            # Construir el texto del resultado
             if raiz is not None:
-                resultado_texto = f"Raíz aproximada: {
-                    raiz:.6f}\nIteraciones: {iteraciones}\n"
-                resultado_texto += "\n".join(
-                    [f"Iteración {i[0]}: x = {i[1]:.6f}, Error = {i[2]:.6e}" for i in resultados])
+                resultado_texto = f"Raíz aproximada: {float(raiz):.4f}\n"
+                resultado_texto += f"Iteraciones: {len(resultados) - 1}\n\n"
+                resultado_texto += "Detalles de las iteraciones:\n"
+                for iteracion, valor, error, f_valor in resultados:
+                    error_texto = f"{
+                        error:.4e}" if error is not None else "N/A"
+                    f_valor_texto = f"{
+                        f_valor:.4e}" if f_valor is not None else "N/A"
+                    resultado_texto += f"Iteración {iteracion}: x = {float(valor):.4f},\t Error = {
+                        error_texto}, \t f(x) = {f_valor_texto}\n"
             else:
-                resultado_texto = "El método no converge."
+                resultado_texto = "El método no converge en las iteraciones dadas."
 
+            # Mostrar resultados
             messagebox.showinfo("Resultado", resultado_texto)
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
 
+        except Exception as e:
+            messagebox.showerror("Error", f"Ha ocurrido un error: {str(e)}")
+
+    # Botón para calcular
     tk.Button(ventana, text="Calcular raíz", command=calcular).pack(pady=20)
+    # Botón para regresar al menú principal
     tk.Button(ventana, text="Regresar al menú principal",
               command=lambda: regresar_al_menu(ventana)).pack(pady=10)
 
